@@ -141,8 +141,45 @@ class HealthConnectManager(private val context: Context) {
   }
 
   /**
+   * TODO: Read [oxysaturation] and [hearthate] values. / Rafael
+   */
+
+  // Função para coletar dados de frequência cardíaca
+  suspend fun collectHeartRateData(startTime: ZonedDateTime, endTime: ZonedDateTime): List<HeartRateRecord> {
+    return readHeartRateData(startTime, endTime)
+  }
+
+  // Função para coletar dados de oxigenação
+//  suspend fun collectOxygenSaturationData(startTime: ZonedDateTime, endTime: ZonedDateTime): List<OxygenSaturationRecord> {
+//    return readOxygenSaturationData(startTime, endTime)
+//  }
+
+  // Funções auxiliares para ler os dados do Health Connect
+  private suspend fun readHeartRateData(startTime: ZonedDateTime, endTime: ZonedDateTime): List<HeartRateRecord> {
+    val request = ReadRecordsRequest(
+      recordType = HeartRateRecord::class,
+      timeRangeFilter = TimeRangeFilter.between(startTime.toInstant(), endTime.toInstant())
+    )
+    val response = healthConnectClient.readRecords(request)
+    return response.records
+  }
+
+//  private suspend fun readOxygenSaturationData(startTime: ZonedDateTime, endTime: ZonedDateTime): List<OxygenSaturationRecord> {
+//    val request = ReadRecordsRequest(
+//      recordType = OxygenSaturationRecord::class,
+//      timeRangeFilter = TimeRangeFilter.between(startTime.toInstant(), endTime.toInstant())
+//    )
+//    val response = healthConnectClient.readRecords(request)
+//    return response.records
+//  }
+
+
+
+
+  /**
    * TODO: Writes an [ExerciseSessionRecord] to Health Connect.
    */
+
   suspend fun writeExerciseSession(start: ZonedDateTime, end: ZonedDateTime) {
     healthConnectClient.insertRecords(
       listOf(

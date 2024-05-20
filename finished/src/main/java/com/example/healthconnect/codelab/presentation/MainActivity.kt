@@ -32,4 +32,11 @@ class MainActivity : ComponentActivity() {
       HealthConnectApp(healthConnectManager = healthConnectManager)
     }
   }
+
+//  override fun onStart(savedInstanceState: Bundle?) {
+//    super.onStart(savedInstanceState)
+//
+//
+//
+//  }
 }

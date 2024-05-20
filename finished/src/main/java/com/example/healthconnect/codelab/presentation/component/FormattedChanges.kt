@@ -47,6 +47,14 @@ import com.example.healthconnect.codelab.presentation.TAG
 import com.example.healthconnect.codelab.presentation.theme.HealthConnectTheme
 import java.time.ZonedDateTime
 
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.encodeToJsonElement
+
+import kotlinx.serialization.Serializable
+import java.time.Instant
+
+
 /**
  * Composables for formatting [Change] objects returned from Health Connect.
  */
@@ -57,6 +65,12 @@ fun FormattedChange(change: Change) {
         is DeletionChange -> FormattedDeletionChange(change)
     }
 }
+
+@Serializable
+data class SampleSerializable(
+    val beatsPerMinute: Float,
+    val time: Instant
+)
 
 @Composable
 fun FormattedUpsertionChange(change: UpsertionChange) {
@@ -95,6 +109,21 @@ fun FormattedUpsertionChange(change: UpsertionChange) {
                 recordType = stringResource(R.string.differential_changes_type_heart_rate_series),
                 dataSource = change.record.metadata.dataOrigin.packageName
             )
+
+//            val samples = listOf(hr.samples.last().beatsPerMinute, hr.samples.last().time)
+//            Log.i("Log Vars", "$samples")
+//            val samples1 = hr.samples.last().toString()
+//            Log.i("Log Vars", "$samples1")
+//            val samples2 = hr.samples
+//            Log.i("Log Vars", "$samples2")
+            val sampleList = hr.samples.map { sample ->
+                SampleSerializable(
+                    beatsPerMinute = sample.beatsPerMinute.toFloat(),
+                    time = sample.time
+                )
+            }
+            val jsonSamples = Json.encodeToJsonElement(sampleList)
+            Log.i("Log Vars", jsonSamples.toString())
         }
         is TotalCaloriesBurnedRecord -> {
             val calories = change.record as TotalCaloriesBurnedRecord
