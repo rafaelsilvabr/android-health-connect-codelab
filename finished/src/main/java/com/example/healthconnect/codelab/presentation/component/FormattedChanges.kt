@@ -53,7 +53,13 @@ import kotlinx.serialization.json.encodeToJsonElement
 
 import kotlinx.serialization.Serializable
 import java.time.Instant
+import kotlinx.serialization.Contextual
 
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializer
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+import java.time.format.DateTimeFormatter
 
 /**
  * Composables for formatting [Change] objects returned from Health Connect.
@@ -66,10 +72,21 @@ fun FormattedChange(change: Change) {
     }
 }
 
+@Serializer(forClass = Instant::class)
+object InstantSerializer : KSerializer<Instant> {
+    private val formatter = DateTimeFormatter.ISO_INSTANT
+    override fun serialize(encoder: Encoder, value: Instant) {
+        encoder.encodeString(formatter.format(value))
+    }
+    override fun deserialize(decoder: Decoder): Instant {
+        return Instant.parse(decoder.decodeString())
+    }
+}
+
 @Serializable
 data class SampleSerializable(
     val beatsPerMinute: Float,
-    val time: Instant
+    @Serializable(with = InstantSerializer::class) val time: Instant
 )
 
 @Composable
@@ -109,18 +126,14 @@ fun FormattedUpsertionChange(change: UpsertionChange) {
                 recordType = stringResource(R.string.differential_changes_type_heart_rate_series),
                 dataSource = change.record.metadata.dataOrigin.packageName
             )
-
-//            val samples = listOf(hr.samples.last().beatsPerMinute, hr.samples.last().time)
-//            Log.i("Log Vars", "$samples")
-//            val samples1 = hr.samples.last().toString()
-//            Log.i("Log Vars", "$samples1")
-//            val samples2 = hr.samples
-//            Log.i("Log Vars", "$samples2")
             val sampleList = hr.samples.map { sample ->
                 SampleSerializable(
                     beatsPerMinute = sample.beatsPerMinute.toFloat(),
                     time = sample.time
                 )
+            }
+            sampleList.forEach { sample ->
+                Log.i("Log Vars", "Beats per minute: ${sample.beatsPerMinute}, Time: ${sample.time}")
             }
             val jsonSamples = Json.encodeToJsonElement(sampleList)
             Log.i("Log Vars", jsonSamples.toString())
