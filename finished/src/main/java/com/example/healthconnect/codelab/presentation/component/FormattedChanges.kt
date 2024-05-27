@@ -48,18 +48,18 @@ import com.example.healthconnect.codelab.presentation.theme.HealthConnectTheme
 import java.time.ZonedDateTime
 
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.encodeToJsonElement
 
+import kotlinx.serialization.Serializer
 import kotlinx.serialization.Serializable
 import java.time.Instant
-import kotlinx.serialization.Contextual
 
 import kotlinx.serialization.KSerializer
-import kotlinx.serialization.Serializer
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import java.time.format.DateTimeFormatter
+
+//import com.example.healthconnect.codelab.presentation.component.CollectData
 
 /**
  * Composables for formatting [Change] objects returned from Health Connect.
@@ -75,6 +75,10 @@ fun FormattedChange(change: Change) {
 @Serializer(forClass = Instant::class)
 object InstantSerializer : KSerializer<Instant> {
     private val formatter = DateTimeFormatter.ISO_INSTANT
+//
+//    override val descriptor: SerialDescriptor =
+//        PrimitiveSerialDescriptor("Instant", PrimitiveKind.STRING)
+
     override fun serialize(encoder: Encoder, value: Instant) {
         encoder.encodeString(formatter.format(value))
     }
