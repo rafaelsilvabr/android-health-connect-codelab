@@ -36,6 +36,7 @@ import androidx.health.connect.client.changes.UpsertionChange
 import androidx.health.connect.client.records.DistanceRecord
 import androidx.health.connect.client.records.ExerciseSessionRecord
 import androidx.health.connect.client.records.HeartRateRecord
+import androidx.health.connect.client.records.OxygenSaturationRecord
 import androidx.health.connect.client.records.SleepSessionRecord
 import androidx.health.connect.client.records.SpeedRecord
 import androidx.health.connect.client.records.StepsRecord
@@ -47,9 +48,6 @@ import com.example.healthconnect.codelab.presentation.TAG
 import com.example.healthconnect.codelab.presentation.theme.HealthConnectTheme
 import java.time.ZonedDateTime
 
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.encodeToJsonElement
-
 import kotlinx.serialization.Serializer
 import kotlinx.serialization.Serializable
 import java.time.Instant
@@ -59,7 +57,7 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import java.time.format.DateTimeFormatter
 
-//import com.example.healthconnect.codelab.presentation.component.CollectData
+import com.example.healthconnect.codelab.data.SendData
 
 /**
  * Composables for formatting [Change] objects returned from Health Connect.
@@ -92,6 +90,38 @@ data class SampleSerializable(
     val beatsPerMinute: Float,
     @Serializable(with = InstantSerializer::class) val time: Instant
 )
+@Serializable
+data class ExerciseSessionSerializable(
+    val name: String,
+    @Serializable(with = InstantSerializer::class) val startTime: Instant,
+    @Serializable(with = InstantSerializer::class) val endTime: Instant
+)
+
+@Serializable
+data class StepsSerializable(
+    val steps: Long,
+    @Serializable(with = InstantSerializer::class) val startTime: Instant,
+    @Serializable(with = InstantSerializer::class) val endTime: Instant
+)
+
+@Serializable
+data class CaloriesBurnedSerializable(
+    val calories: Float,
+    @Serializable(with = InstantSerializer::class) val startTime: Instant,
+    @Serializable(with = InstantSerializer::class) val endTime: Instant
+)
+
+@Serializable
+data class WeightSerializable(
+    val weight: Float,
+    @Serializable(with = InstantSerializer::class) val time: Instant
+)
+
+@Serializable
+data class OxygenSaturationSerializable(
+    val oxygenSaturation: Float,
+    @Serializable(with = InstantSerializer::class) val time: Instant
+)
 
 @Composable
 fun FormattedUpsertionChange(change: UpsertionChange) {
@@ -114,6 +144,14 @@ fun FormattedUpsertionChange(change: UpsertionChange) {
                 recordType = stringResource(R.string.differential_changes_type_steps),
                 dataSource = change.record.metadata.dataOrigin.packageName
             )
+            val stepsData = StepsSerializable(
+                steps = steps.count,
+                startTime = steps.startTime,
+                endTime = steps.endTime
+            )
+            val collectData = SendData()
+            collectData.sendStepsToMqttBroker(listOf(stepsData))
+
         }
         is SpeedRecord -> {
             val speed = change.record as SpeedRecord
@@ -136,11 +174,13 @@ fun FormattedUpsertionChange(change: UpsertionChange) {
                     time = sample.time
                 )
             }
-            sampleList.forEach { sample ->
-                Log.i("Log Vars", "Beats per minute: ${sample.beatsPerMinute}, Time: ${sample.time}")
-            }
-            val jsonSamples = Json.encodeToJsonElement(sampleList)
-            Log.i("Log Vars", jsonSamples.toString())
+//            sampleList.forEach { sample ->
+//                Log.i("Log Vars", "Beats per minute: ${sample.beatsPerMinute}, Time: ${sample.time}")
+//            }
+//            val jsonSamples = Json.encodeToJsonElement(sampleList)
+//            Log.i("Log Vars", jsonSamples.toString())
+            val collectData = SendData()
+            collectData.sendSamplesToMqttBroker(sampleList)
         }
         is TotalCaloriesBurnedRecord -> {
             val calories = change.record as TotalCaloriesBurnedRecord
@@ -152,6 +192,13 @@ fun FormattedUpsertionChange(change: UpsertionChange) {
                 recordType = stringResource(R.string.differential_changes_type_total_calories),
                 dataSource = change.record.metadata.dataOrigin.packageName
             )
+            val caloriesData = CaloriesBurnedSerializable(
+                calories = calories.energy.inKilocalories.toFloat(),
+                startTime = calories.startTime,
+                endTime = calories.endTime
+            )
+            val collectData = SendData()
+            collectData.sendCaloriesToMqttBroker(listOf(caloriesData))
         }
         is SleepSessionRecord -> {
             val sleep = change.record as SleepSessionRecord
@@ -168,6 +215,12 @@ fun FormattedUpsertionChange(change: UpsertionChange) {
                 recordType = stringResource(R.string.differential_changes_type_weight),
                 dataSource = change.record.metadata.dataOrigin.packageName
             )
+            val weightData = WeightSerializable(
+                weight = weight.weight.inKilograms.toFloat(),
+                time = weight.time
+            )
+            val collectData = SendData()
+            collectData.sendWeightToMqttBroker(listOf(weightData))
         }
         is DistanceRecord -> {
             val distance = change.record as DistanceRecord
@@ -179,6 +232,20 @@ fun FormattedUpsertionChange(change: UpsertionChange) {
                 recordType = stringResource(R.string.differential_changes_type_distance),
                 dataSource = change.record.metadata.dataOrigin.packageName
             )
+        }
+        is OxygenSaturationRecord -> {
+            val oxygen = change.record as OxygenSaturationRecord
+            FormattedChangeRow(
+                startTime = dateTimeWithOffsetOrDefault(oxygen.time, oxygen.zoneOffset),
+                recordType = stringResource(R.string.differential_changes_type_oxygen_saturation),
+                dataSource = change.record.metadata.dataOrigin.packageName
+            )
+            val oxygenData = OxygenSaturationSerializable(
+                oxygenSaturation = oxygen.percentage.value.toFloat(),
+                time = oxygen.time
+            )
+            val collectData = SendData()
+            collectData.sendOxygenSaturationToMqttBroker(listOf(oxygenData))
         }
         else -> {
             Log.w(TAG, "Unknown record type: ${change.record}")

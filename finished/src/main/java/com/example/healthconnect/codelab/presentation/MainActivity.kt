@@ -15,9 +15,11 @@
  */
 package com.example.healthconnect.codelab.presentation
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import com.example.healthconnect.codelab.data.DataCollectionService
 
 /**
  * The entry point into the sample.
@@ -28,15 +30,10 @@ class MainActivity : ComponentActivity() {
 
     val healthConnectManager = (application as BaseApplication).healthConnectManager
 
+    startService(Intent(this, DataCollectionService::class.java))
+
     setContent {
       HealthConnectApp(healthConnectManager = healthConnectManager)
     }
   }
-
-//  override fun onStart(savedInstanceState: Bundle?) {
-//    super.onStart(savedInstanceState)
-//
-//
-//
-//  }
 }

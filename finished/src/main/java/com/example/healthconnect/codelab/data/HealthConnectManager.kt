@@ -31,6 +31,7 @@ import androidx.health.connect.client.records.StepsRecord
 import androidx.health.connect.client.records.TotalCaloriesBurnedRecord
 import androidx.health.connect.client.records.WeightRecord
 import androidx.health.connect.client.records.metadata.DataOrigin
+import androidx.health.connect.client.records.OxygenSaturationRecord
 import androidx.health.connect.client.request.AggregateRequest
 import androidx.health.connect.client.request.ChangesTokenRequest
 import androidx.health.connect.client.request.ReadRecordsRequest
@@ -150,9 +151,14 @@ class HealthConnectManager(private val context: Context) {
   }
 
   // Função para coletar dados de oxigenação
-//  suspend fun collectOxygenSaturationData(startTime: ZonedDateTime, endTime: ZonedDateTime): List<OxygenSaturationRecord> {
-//    return readOxygenSaturationData(startTime, endTime)
-//  }
+  suspend fun readOxygenSaturationData(start: Instant, end: Instant): List<OxygenSaturationRecord> {
+    val request = ReadRecordsRequest(
+      recordType = OxygenSaturationRecord::class,
+      timeRangeFilter = TimeRangeFilter.between(start, end)
+    )
+    val response = healthConnectClient.readRecords(request)
+    return response.records
+  }
 
   // Funções auxiliares para ler os dados do Health Connect
   private suspend fun readHeartRateData(startTime: ZonedDateTime, endTime: ZonedDateTime): List<HeartRateRecord> {
@@ -208,6 +214,16 @@ class HealthConnectManager(private val context: Context) {
       ) + buildHeartRateSeries(start, end)
     )
   }
+
+  //Read OxygenSaturaion
+//    suspend fun readOxygenSaturationData(start: Instant, end: Instant): List<OxygenSaturationRecord> {
+//        val request = ReadRecordsRequest(
+//        recordType = OxygenSaturationRecord::class,
+//        timeRangeFilter = TimeRangeFilter.between(start, end)
+//        )
+//        val response = healthConnectClient.readRecords(request)
+//        return response.records
+//    }
 
   /**
    * TODO: Build [HeartRateRecord].
@@ -292,6 +308,7 @@ class HealthConnectManager(private val context: Context) {
           TotalCaloriesBurnedRecord::class,
           HeartRateRecord::class,
           WeightRecord::class
+          //OxygenSaturationRecord::class
         )
       )
     )

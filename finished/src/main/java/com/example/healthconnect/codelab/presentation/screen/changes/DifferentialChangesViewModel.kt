@@ -27,6 +27,7 @@ import androidx.health.connect.client.changes.Change
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.ExerciseSessionRecord
 import androidx.health.connect.client.records.HeartRateRecord
+import androidx.health.connect.client.records.OxygenSaturationRecord
 import androidx.health.connect.client.records.StepsRecord
 import androidx.health.connect.client.records.TotalCaloriesBurnedRecord
 import androidx.health.connect.client.records.WeightRecord
@@ -34,6 +35,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.healthconnect.codelab.data.HealthConnectManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import java.io.IOException
 import java.util.UUID
 import kotlinx.coroutines.launch
@@ -46,7 +49,8 @@ class DifferentialChangesViewModel(private val healthConnectManager: HealthConne
         StepsRecord::class,
         TotalCaloriesBurnedRecord::class,
         HeartRateRecord::class,
-        WeightRecord::class
+        WeightRecord::class,
+        OxygenSaturationRecord::class
     )
 
     val permissions = changesDataTypes.map { HealthPermission.getReadPermission(it) }.toSet()
@@ -102,6 +106,37 @@ class DifferentialChangesViewModel(private val healthConnectManager: HealthConne
                         }
                     }
                 }
+            }
+        }
+    }
+    fun getChangesForService() {
+        Log.i(TAG, "Getting changes")
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                Log.i(TAG, "Getting changes")
+                changesToken.value?.let { token ->
+                    changes.clear()
+                    healthConnectManager.getChanges(token).collect { message ->
+                        when (message) {
+                            is HealthConnectManager.ChangesMessage.ChangeList -> {
+                                changes.addAll(message.changes)
+                                Log.i(TAG, "Adding ${message.changes.size} changes")
+                            }
+                            is HealthConnectManager.ChangesMessage.NoMoreChanges -> {
+                                changesToken.value = message.nextChangesToken
+                                Log.i(TAG, "Updating changes token: ${changesToken.value}")
+                            }
+                        }
+                    }
+                }
+            } catch (remoteException: RemoteException) {
+                uiState = UiState.Error(remoteException)
+            } catch (securityException: SecurityException) {
+                uiState = UiState.Error(securityException)
+            } catch (ioException: IOException) {
+                uiState = UiState.Error(ioException)
+            } catch (illegalStateException: IllegalStateException) {
+                uiState = UiState.Error(illegalStateException)
             }
         }
     }

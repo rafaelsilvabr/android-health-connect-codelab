@@ -128,6 +128,13 @@
   <string name="differential_changes_type_sleep_stage">Sleep stage</string>
   <string name="differential_changes_type_distance">Distance</string>
   <string name="differential_changes_type_weight">Weight</string>
+  <string name="differential_changes_type_oxygen_saturation">Oxygen saturation</string>
+
+  <string name="channel_id">DataCollectionServiceChannel</string>
+  <string name="channel_name">Data Collection Service Channel</string>
+  <string name="channel_description">Notification Channel for Data Collection Service</string>
+  <string name="notification_title">Data Collection Service</string>
+  <string name="notification_text">Running...</string>
 
   <!-- Health Connect settings -->
   <string name="settings">Settings</string>

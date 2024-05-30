@@ -15,6 +15,7 @@
  */
 package com.example.healthconnect.codelab.presentation.screen.changes
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -36,6 +37,10 @@ import androidx.compose.ui.unit.dp
 import androidx.health.connect.client.changes.Change
 import com.example.healthconnect.codelab.R
 import com.example.healthconnect.codelab.presentation.component.FormattedChange
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.util.UUID
 
 /**
@@ -127,7 +132,9 @@ fun DifferentialChangesScreen(
                     Button(
                         modifier = Modifier.padding(8.dp),
                         enabled = changesEnabled,
-                        onClick = onGetChanges
+                        onClick = {
+                            onGetChanges()
+                        }
                     ) {
                         Text(stringResource(R.string.differential_changes_button_text))
                     }
