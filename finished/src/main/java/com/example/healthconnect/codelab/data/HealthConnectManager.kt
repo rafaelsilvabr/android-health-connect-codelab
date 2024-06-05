@@ -307,8 +307,8 @@ class HealthConnectManager(private val context: Context) {
           StepsRecord::class,
           TotalCaloriesBurnedRecord::class,
           HeartRateRecord::class,
-          WeightRecord::class
-          //OxygenSaturationRecord::class
+          WeightRecord::class,
+          OxygenSaturationRecord::class
         )
       )
     )

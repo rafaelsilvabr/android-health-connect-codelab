@@ -46,6 +46,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.healthconnect.codelab.presentation.MainActivity
 //import DifferentialChangesViewModel
 import com.example.healthconnect.codelab.presentation.screen.changes.DifferentialChangesViewModel
+import android.content.Context
+import android.os.BatteryManager
+import org.json.JSONObject
 
 
 @Serializer(forClass = Instant::class)
@@ -154,20 +157,23 @@ class DataCollectionService : Service() {
         serviceScope.launch {
             Log.i(TAG, "Starting data collection service")
             while (true) {
-                Log.i(TAG, "Checking for changes")
+                //Log.i(TAG, "Checking for changes")
                 serviceScope.launch {
                     differentialChangesViewModel.getChanges()
                     changes.forEach { change ->
-                        Log.i(TAG, "Processing change: $change")
+                        //Log.i(TAG, "Processing change: $change")
                         if(change is UpsertionChange){
                             processChange(change)
                         }
                     }
                 }
 
-                Log.i(ContentValues.TAG, "Getting changes")
+                //Log.i(ContentValues.TAG, "Getting changes")
 
                 delay(5000)
+                val batteryPercentage = getBatteryPercentage(this@DataCollectionService)
+                val sendData = SendData()
+                sendData.sendBatteryDataToMqttBroker(batteryPercentage)
             }
         }
         return START_STICKY
@@ -235,8 +241,7 @@ class DataCollectionService : Service() {
             is DistanceRecord -> {
                 val distance = change.record as DistanceRecord
             }
-            is OxygenSaturationRecord -> { //TODO - Não estão chegando dados de OxygenSaturationRecord
-                Log.i(TAG, "Oxygen saturation record!!")
+            is OxygenSaturationRecord -> {
                 val oxygen = change.record as OxygenSaturationRecord
                 val oxygenData = OxygenSaturationSerializable(
                     oxygenSaturation = oxygen.percentage.value.toFloat(),
@@ -249,5 +254,14 @@ class DataCollectionService : Service() {
                 Log.w(TAG, "Unknown record type: ${change.record}")
             }
         }
+
     }
+
+}
+
+fun getBatteryPercentage(context: Context): Int {
+    val batteryManager = context.getSystemService(Context.BATTERY_SERVICE) as BatteryManager
+    val batteryPercentage = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
+
+    return batteryPercentage
 }

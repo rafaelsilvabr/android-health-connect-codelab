@@ -14,6 +14,8 @@ import com.example.healthconnect.codelab.presentation.component.WeightSerializab
 
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.encodeToJsonElement
+import org.json.JSONObject
+import java.time.Instant
 
 
 class SendData {
@@ -49,34 +51,34 @@ class SendData {
     fun sendSamplesToMqttBroker(samples: List<SampleSerializable>) {
         samples.forEach { sample ->
             val content = Json.encodeToJsonElement(sample)
-            Log.i("LogCollectData", "Sample: ${content.toString()}")
+            Log.i("LogCollectData", "${content.toString()}")
         }
     }
 
     fun sendExerciseSessionToMqttBroker(exerciseSessions: List<ExerciseSessionSerializable>) {
         exerciseSessions.forEach { exerciseSession ->
             val content = Json.encodeToJsonElement(exerciseSession)
-            Log.i("LogCollectData", "ExerciseSession: ${content.toString()}")
+            Log.i("LogCollectData", "${content.toString()}")
         }
     }
 
     fun sendStepsToMqttBroker(steps: List<StepsSerializable>) {
         steps.forEach { step ->
             val content = Json.encodeToJsonElement(step)
-            Log.i("LogCollectData", "Step: ${content.toString()}")
+            Log.i("LogCollectData", "${content.toString()}")
         }
     }
 
     fun sendCaloriesToMqttBroker(steps: List<CaloriesBurnedSerializable>) {
         steps.forEach { step ->
             val content = Json.encodeToJsonElement(step)
-            Log.i("LogCollectData", "Step: ${content.toString()}")
+            Log.i("LogCollectData", "${content.toString()}")
         }
     }
     fun sendWeightToMqttBroker(steps: List<WeightSerializable>) {
         steps.forEach { step ->
             val content = Json.encodeToJsonElement(step)
-            Log.i("LogCollectData", "Step: ${content.toString()}")
+            Log.i("LogCollectData", "${content.toString()}")
         }
     }
     fun sendOxygenSaturationToMqttBroker(steps: List<OxygenSaturationSerializable>) {
@@ -84,6 +86,17 @@ class SendData {
             val content = Json.encodeToJsonElement(step)
             Log.i("LogCollectData", "${content.toString()}")
         }
+    }
+
+    fun sendBatteryDataToMqttBroker(battery: Int) {
+        val collectTime = Instant.now()
+
+
+        val content = JSONObject()
+        content.put("cellphoneBattery", battery)
+        content.put("time", collectTime.toString())
+
+        Log.i("LogCollectData", "${content.toString()}")
     }
 
 }
