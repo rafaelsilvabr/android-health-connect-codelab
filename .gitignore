@@ -36,3 +36,4 @@ proguard-project.txt
 .idea
 
 /finished/certs
+/finished/src/main/assets/certs
