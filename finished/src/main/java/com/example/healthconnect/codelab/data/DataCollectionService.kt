@@ -173,7 +173,7 @@ class DataCollectionService : Service() {
                 delay(5000)
                 val batteryPercentage = getBatteryPercentage(this@DataCollectionService)
                 val sendData = SendData()
-                sendData.sendBatteryDataToMqttBroker(batteryPercentage)
+                sendData.sendBatteryDataToMqttBroker(this@DataCollectionService, batteryPercentage)
             }
         }
         return START_STICKY
