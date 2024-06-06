@@ -37,3 +37,4 @@ proguard-project.txt
 
 /finished/certs
 /finished/src/main/assets/certs
+*.pem
