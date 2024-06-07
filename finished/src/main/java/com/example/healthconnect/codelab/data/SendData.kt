@@ -36,93 +36,10 @@ import okhttp3.Response
 import okhttp3.RequestBody.Companion.toRequestBody
 import kotlinx.coroutines.*
 
+import com.example.healthconnect.codelab.data.AwsIotHandler
+
 
 class SendData {
-
-    fun getSocketFactory(context: Context): SSLSocketFactory {
-        val assetManager = context.assets
-        val caInput = BufferedInputStream(context.resources.openRawResource(R.raw.aws_root_ca))
-        val caCert = CertificateFactory.getInstance("X.509").generateCertificate(caInput)
-        caInput.close()
-//        val caCert = CertificateFactory.getInstance("X.509")
-//        .generateCertificate(context.resources.openRawResource(R.raw.aws_root_ca))
-
-        val caKeyStore = KeyStore.getInstance(KeyStore.getDefaultType()).apply {
-            load(null, null)
-            setCertificateEntry("ca-crt", caCert)
-        }
-
-        val caTrustManager = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm()).apply {
-            init(caKeyStore)
-        }
-
-//        val cert = CertificateFactory.getInstance("X.509")
-//            .generateCertificate(context.resources.openRawResource(R.raw.client_cert))
-
-        val certInput = BufferedInputStream(context.resources.openRawResource(R.raw.client_cert))
-        val cert = CertificateFactory.getInstance("X.509").generateCertificate(certInput)
-        certInput.close()
-
-//        val key = CertificateFactory.getInstance("X.509")
-//            .generateCertificate(context.resources.openRawResource(R.raw.client_key_private))
-
-        val keyInput = BufferedInputStream(context.resources.openRawResource(R.raw.client_key_private))
-        val key = CertificateFactory.getInstance("X.509").generateCertificate(keyInput)
-        keyInput.close()
-
-        val keyStore = KeyStore.getInstance(KeyStore.getDefaultType()).apply {
-            load(null, null)
-            setCertificateEntry("crt", cert)
-            setCertificateEntry("key", key)
-        }
-
-        val keyManager = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm()).apply {
-            init(keyStore, null)
-        }
-
-        val sslContext = SSLContext.getInstance("SSL").apply {
-            init(keyManager.keyManagers, caTrustManager.trustManagers, null)
-        }
-
-        return sslContext.socketFactory
-    }
-
-    private fun sendMqttMessage(context: Context){
-        val broker = "<your-broker-url>"
-        val clientId = MqttClient.generateClientId()
-        val persistence = MemoryPersistence()
-
-        try {
-            val client = MqttClient(broker, clientId, persistence)
-            val connOpts = MqttConnectOptions()
-            connOpts.isCleanSession = true
-            connOpts.socketFactory = getSocketFactory(
-                context
-            )
-            print("Connecting to broker: $broker")
-            client.connect(connOpts)
-            print("Connected")
-
-            val topic = "<your-topic>"
-            val content = "<your-message>"
-
-            print("Publishing message: $content")
-            val message = MqttMessage(content.toByteArray())
-            message.qos = 2
-            client.publish(topic, message)
-            print("Message published")
-
-            client.disconnect()
-            print("Disconnected")
-        } catch (me: MqttException) {
-            print("reason " + me.reasonCode)
-            print("msg " + me.message)
-            print("loc " + me.localizedMessage)
-            print("cause " + me.cause)
-            print("excep " + me)
-            me.printStackTrace()
-        }
-    }
 
     fun sendSamplesToMqttBroker(samples: List<SampleSerializable>) {
         samples.forEach { sample ->
@@ -194,7 +111,9 @@ class SendData {
 
         //this.sendMqttMessage(context)
         GlobalScope.launch {
-            makeNetworkCall(content.toString())
+            //makeNetworkCall(content.toString())
+//            val awsIotHandler = AwsIotHandler(context)
+            //awsIotHandler.connect()
         }
     }
 

@@ -153,6 +153,7 @@ class DataCollectionService : Service() {
             .build()
         startForeground(1, notification)
 
+        val awsIotHandler = AwsIotHandler(this@DataCollectionService)
 
         serviceScope.launch {
             Log.i(TAG, "Starting data collection service")
@@ -170,7 +171,7 @@ class DataCollectionService : Service() {
 
                 //Log.i(ContentValues.TAG, "Getting changes")
 
-                delay(5000)
+                delay(10000)
                 val batteryPercentage = getBatteryPercentage(this@DataCollectionService)
                 val sendData = SendData()
                 sendData.sendBatteryDataToMqttBroker(this@DataCollectionService, batteryPercentage)
